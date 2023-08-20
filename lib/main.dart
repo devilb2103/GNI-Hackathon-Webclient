@@ -1,5 +1,6 @@
+import 'package:client/app_navigator.dart';
+import 'package:client/cubits/pdf_generation_cubit/pdf_generation_cubit.dart';
 import 'package:client/cubits/prediction_cubit/prediction_cubit.dart';
-import 'package:client/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,8 +21,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => PredictionCubit(),
           ),
+          BlocProvider(
+            create: (context) => PdfGenerationCubit(),
+          ),
         ],
-        child: HomePage(),
+        child: const AppNavigator(),
       ),
     );
   }

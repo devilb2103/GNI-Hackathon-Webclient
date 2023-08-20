@@ -1,6 +1,5 @@
 part of 'prediction_cubit.dart';
 
-@immutable
 abstract class PredictionState {
   const PredictionState();
 }

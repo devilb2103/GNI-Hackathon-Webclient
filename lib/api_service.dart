@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 import 'package:client/constants.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class DioSingleton {
   static final DioSingleton _instance = DioSingleton._internal();
@@ -14,12 +12,13 @@ class DioSingleton {
 
   // predict path ---------------------------------------------------------------------------
   Future<Response<dynamic>> getPredictionData(
-      List<Uint8List> imageBytesList) async {
+    List<Uint8List?> imageBytesList,
+  ) async {
     FormData formData = FormData();
 
     // Add images to FormData
     for (int i = 0; i < imageBytesList.length; i++) {
-      Uint8List imageBytes = imageBytesList[i];
+      Uint8List imageBytes = imageBytesList[i]!;
       String imageName = 'uploaded_image_$i.jpg';
       formData.files.add(MapEntry('imagefiles',
           MultipartFile.fromBytes(imageBytes, filename: imageName)));
@@ -39,26 +38,22 @@ class DioSingleton {
         data: formData, options: Options(responseType: ResponseType.json));
 
     return response;
-    // if (response.statusCode == 200) {
-
-    // } else {
-    //   print(
-    //       'Failed to send images and data. Status code: ${response.statusCode}');
-    // }
-    // } catch (e) {
-    //   print('Error sending request: $e');
-    // }
   }
 
   // predict path ---------------------------------------------------------------------------
   // Future<Response<dynamic>> generatePDF(
-  Future<void> generatePDF(
-      List<Uint8List> imageBytesList, BuildContext context) async {
+  Future<Response<dynamic>> generatePDF(
+    List<Uint8List?> imageBytesList,
+    String reportNumber,
+    String patientId,
+    String scanDate,
+    String patientAge,
+  ) async {
     FormData formData = FormData();
 
     // Add images to FormData
     for (int i = 0; i < imageBytesList.length; i++) {
-      Uint8List imageBytes = imageBytesList[i];
+      Uint8List imageBytes = imageBytesList[i]!;
       String imageName = 'uploaded_image_$i.jpg';
       formData.files.add(MapEntry('imagefiles',
           MultipartFile.fromBytes(imageBytes, filename: imageName)));
@@ -68,40 +63,18 @@ class DioSingleton {
     var jsonData = {
       // Add your additional data fields here
       'classifications': prediction_data.toString(),
-      '<report_number>': '13001369',
-      '<patient_id>': '9-11-ak47',
-      '<patient_age>': '23',
-      '<scan_date>': '12 / 2 / 2004',
+      '<report_number>': reportNumber,
+      '<patient_id>': patientId,
+      '<patient_age>': patientAge,
+      '<scan_date>': scanDate,
     };
 
     formData.fields.addAll(jsonData.entries);
 
-    try {
-      final response = await _client.post("/getPDF",
-          data: formData, options: Options(responseType: ResponseType.bytes));
-      dynamic pdfData = response.data;
-      // print(pdfData.toString());
-      // final file = File('../downloaded_pdf.pdf');
-      // Uint8List pdfData_filtered = Uint8List.fromList(base64.decode(pdfData));
-      // await file.writeAsBytes(pdfData);
-
-      // final _pdfController = PdfController(
-      //   document: PdfDocument.openData(pdfData_filtered),
-      //   // initialPage: _initialPage,
-      // );
-
-      Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) => Scaffold(
-                  body: SfPdfViewer.memory(pdfData),
-                )),
-      );
-    } catch (e) {
-      // Handle error.
-      print('Error fetching PDF: $e');
-    }
-
-    // return response;
+    final response = await _client.post("/getPDF",
+        data: formData, options: Options(responseType: ResponseType.bytes));
+    dynamic pdfData = response;
+    return pdfData;
   }
 
   /// All other requests
