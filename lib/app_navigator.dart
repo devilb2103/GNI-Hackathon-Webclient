@@ -1,3 +1,4 @@
+import 'package:client/Screens/analysis_screen.dart';
 import 'package:client/Screens/patient_details_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,8 @@ class _AppNavigatorState extends State<AppNavigator> {
         //   child: AnalysisScreen(
         //       reportNumber: "13001369",
         //       patientId: "9-11-ak47",
-        //       scanDate: "Sunday, August 20, 2023",
+        //       scanDate: "20/8/2023",
+        //       scanDateText: "Sunday, August 20, 2023",
         //       patientAge: "33",
         //       analysisDate: "Sunday, August 20, 2023",
         //       imageType: "MRI - T1, T2 and FLAIR"),

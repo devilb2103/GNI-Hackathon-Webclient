@@ -39,14 +39,23 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   TextStyle hintStyle = const TextStyle(color: Colors.white38);
 
   Future<void> _pickImage(
-      Uint8List? bytes, Function(Uint8List) updateBytes) async {
-    final ImagePicker picker = ImagePicker();
-    XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      bytes = await image.readAsBytes();
-      updateBytes(bytes);
+      Uint8List? bytes, Function(Uint8List?) updateBytes, bool removing) async {
+    if (removing) {
+      updateBytes(null);
+
       setState(() {});
-    } else {}
+    } else {
+      final ImagePicker picker = ImagePicker();
+      XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        bytes = await image.readAsBytes();
+        updateBytes(bytes);
+        setState(() {});
+        // print("Image was not picked");
+      } else {
+        // print("Image was not picked");
+      }
+    }
   }
 
   @override
@@ -350,9 +359,20 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       color: Colors.black26,
       child: Column(children: [
         imagePickerWidget(
-            "Flair", flair_bytes, (newBytes) => flair_bytes = newBytes),
-        imagePickerWidget("T1", t1_bytes, (newBytes) => t1_bytes = newBytes),
-        imagePickerWidget("T2", t2_bytes, (newBytes) => t2_bytes = newBytes),
+          "Flair",
+          flair_bytes,
+          (newBytes) => flair_bytes = newBytes,
+        ),
+        imagePickerWidget(
+          "T1",
+          t1_bytes,
+          (newBytes) => t1_bytes = newBytes,
+        ),
+        imagePickerWidget(
+          "T2",
+          t2_bytes,
+          (newBytes) => t2_bytes = newBytes,
+        ),
         const SizedBox(height: 75),
       ]),
     );
@@ -409,57 +429,84 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   }
 
   Widget imagePickerWidget(
-      String imageType, Uint8List? bytes, Function(Uint8List) updateBytes) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
-      child: GestureDetector(
-        onTap: () {
-          if (bytes == null) {
-            _pickImage(bytes, updateBytes);
-          }
-        },
-        child: Column(
-          children: [
-            // title text
-            bytes != null
-                ? Text(
-                    "$imageType image",
-                    style: hintStyle,
-                  )
-                : const SizedBox(),
-            const SizedBox(height: 3),
-            // image container
-            Container(
-              height: 180,
-              width: 180,
-              decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(21),
-                  border: Border.all(color: Colors.grey.shade800)),
-              child: bytes == null
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image,
-                          color: hintStyle.color,
-                        ),
-                        const SizedBox(height: 9),
-                        Text(
-                          "Attach $imageType Image",
-                          style: hintStyle,
+      String imageType, Uint8List? bytes, Function(Uint8List?) updateBytes) {
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+          child: GestureDetector(
+            onTap: () {
+              if (bytes == null) {
+                _pickImage(bytes, updateBytes, false);
+              }
+            },
+            child: Column(
+              children: [
+                // title text
+                bytes != null
+                    ? Text(
+                        "$imageType image",
+                        style: hintStyle,
+                      )
+                    : const SizedBox(),
+                const SizedBox(height: 3),
+                // image container
+                Container(
+                  height: 180,
+                  width: 180,
+                  decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(21),
+                      border: Border.all(color: Colors.grey.shade800)),
+                  child: bytes == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.image,
+                              color: hintStyle.color,
+                            ),
+                            const SizedBox(height: 9),
+                            Text(
+                              "Attach $imageType Image",
+                              style: hintStyle,
+                            )
+                          ],
                         )
-                      ],
-                    )
-                  : Center(
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(21),
-                          child: Image.memory(bytes)),
-                    ),
+                      : Center(
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(21),
+                              child: Image.memory(bytes)),
+                        ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        if (bytes != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 9),
+            child: GestureDetector(
+              onTap: () {
+                _pickImage(bytes, updateBytes, true);
+              },
+              child: Container(
+                height: 27,
+                width: 27,
+                decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 25, 24, 25),
+                    borderRadius: BorderRadius.circular(3)),
+                child: Icon(
+                  Icons.image_not_supported_rounded,
+                  color: text_color,
+                ),
+              ),
+            ),
+          )
+        else
+          SizedBox()
+      ],
     );
   }
 }
